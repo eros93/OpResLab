@@ -1,0 +1,54 @@
+model "Lab0 - BinPacking"
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+!sample declarations section
+declarations
+	BIN = 1..8	!Number of bins
+	ITEM = 1..8	!Number of items
+	
+	x: array(ITEM,BIN) of mpvar	!Variable x
+	y: array(BIN) of mpvar		!Variable y
+  	
+  	BINSIZE: array(BIN) of integer
+  	ITEMSIZE: array(ITEM) of integer  	
+end-declarations
+
+BINSIZE:: [20,20,20,20,20,20,20,20]	! 3 bins used 
+! BINSIZE:: [11,11,11,11,11,11,11,11]	! 6 bins used 
+! BINSIZE:: [1,1,1,1,1,1,1,1]			! 0 bins used [EMPTY SOLUTION]
+ITEMSIZE:: [4,5,6,6,7,8,10,11]
+
+! OBJECTIVE FUNCTION
+NumBin := sum(j in BIN) y(j)
+
+! CONSTRAINTS
+forall (i in ITEM, j in BIN) x(i,j) <= y(j)
+forall (i in ITEM) sum(j in BIN) x(i,j) = 1
+forall (j in BIN) sum(i in ITEM) ITEMSIZE(i)*x(i,j) <= BINSIZE(j)
+
+forall (i in ITEM, j in BIN) x(i,j) is_binary
+forall (j in BIN) y(j) is_binary
+
+! OPTIMIZATION STATEMENT
+minimize(NumBin)
+
+! Display OUTPUT
+writeln("Number of bins used: ", getobjval) ! getobjval return the value of the objective function 
+
+forall(j in BIN) do 	! iterate over the bins
+	if getsol(y(j)) = 1 then 		! check if the bin is used ( y = 1 )
+									! y is an mpvar so we need getsol function to return its value  
+		writeln("Bin ", j," is used. (Size: ", BINSIZE(j), ")")
+		writeln(" Items: ")
+		
+		forall(i in ITEM)	! iterate over the matrix x which contains the association among items and bins 
+			if getsol(x(i,j)) = 1 then		! check if item is contained in the bin j 
+				writeln(" ", i," (Size: ", ITEMSIZE(i), ")")
+			end-if
+	else
+		writeln("Bin ", j, " is NOT used. (Size: ", BINSIZE(j), ")")
+		writeln(" Items: NONE.")
+	end-if
+end-do
+
+end-model

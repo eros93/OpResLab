@@ -1,0 +1,61 @@
+model "Lab1 - LTD"
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+setparam("XPRS_MAXTIME",-600)
+
+!sample declarations section
+declarations
+	NODES = 1..10		!Number of nodes
+	
+	fsd: array(NODES,NODES,NODES,NODES) of mpvar	!Flow Matrix from s to d over lightpath ij
+  	b: array(NODES,NODES) of mpvar		!Presence of lightpath ij
+  	f: array(NODES, NODES) of mpvar		!Total amount of traffic over lightpath ij
+  	fmax: mpvar
+  	
+  	TRAFFIC: array(NODES,NODES) of real
+	
+	DELTA: integer
+	
+end-declarations
+
+
+DELTA := 3	!Number of tx (laser) and rx (photodiode) per node
+
+setrandseed(4) !set a different seed for each run
+! generate a matrix of Uniform[1,10] numbers
+forall(n,m in NODES | n <> m) do
+	TRAFFIC(n,m):= 1+(random*(10-1))
+end-do
+
+! OBJECTIVE FUNCTION
+! fmax
+
+! CONSTRAINTS
+!Flow Relationships
+forall (i, j in NODES) do
+	f(i, j) <= fmax
+	sum(s,d in NODES) fsd(i, j, s, d) = f(i, j)
+end-do
+!Connectivity constraints
+forall (i, j in NODES) b(i, j) is_binary
+forall(i in NODES) sum(j in NODES) b(i, j) <= DELTA
+forall(j in NODES) sum(i in NODES) b(i, j) <= DELTA 
+!Flow conservation at each node
+forall(s, d in NODES) do
+	forall(i in NODES | i <> s and i <> d) sum(j in NODES) fsd(i, j, s, d) - sum(j in NODES) fsd(j, i, s, d) = 0
+	!what enters in a node must come out
+	sum(j in NODES) fsd(s, j, s, d) = TRAFFIC(s, d)	!total flow exiting s must be traffic
+	sum(j in NODES) fsd(j, d, s, d) = TRAFFIC(s, d)	!total flow entering d must be traffic
+	sum(j in NODES) fsd(j, s, s, d) = 0		!nothing can enter s
+	sum(j in NODES) fsd(d, j, s, d) = 0		!nothing can exit d
+end-do
+!Feasibility constraints
+forall(i, j, s, d in NODES) fsd(i, j, s, d) <= b(i, j)*TRAFFIC(s, d)
+
+! OPTIMIZATION STATEMENT
+minimize(fmax)
+
+! Display OUTPUT
+writeln("fmax = ", getobjval)
+
+end-model
