@@ -1,0 +1,53 @@
+# Project: graph
+# Makefile created by Dev-C++ 4.9.9.0
+
+CPP  = g++.exe -D__DEBUG__
+CC   = gcc.exe -D__DEBUG__
+WINDRES = windres.exe
+RES  = 
+OBJ  = fault.o graph.o matrix.o misc.o print_structures.o random.o routing.o main.o rwa.o $(RES)
+LINKOBJ  = fault.o graph.o matrix.o misc.o print_structures.o random.o routing.o main.o rwa.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib"  -g3 
+INCS =  -I"C:/Dev-Cpp/include" 
+CXXINCS =  -I"C:/Dev-Cpp/include/c++/3.3.1"  -I"C:/Dev-Cpp/include/c++/3.3.1/mingw32"  -I"C:/Dev-Cpp/include/c++/3.3.1/backward"  -I"C:/Dev-Cpp/lib/gcc-lib/mingw32/3.3.1/include"  -I"C:/Dev-Cpp/include" 
+BIN  = graph.exe
+CXXFLAGS = $(CXXINCS)   -g3
+CFLAGS = $(INCS)   -g3
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before graph.exe all-after
+
+
+clean: clean-custom
+	rm -f $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o "graph.exe" $(LIBS)
+
+fault.o: fault.c
+	$(CC) -c fault.c -o fault.o $(CFLAGS)
+
+graph.o: graph.c
+	$(CC) -c graph.c -o graph.o $(CFLAGS)
+
+matrix.o: matrix.c
+	$(CC) -c matrix.c -o matrix.o $(CFLAGS)
+
+misc.o: misc.c
+	$(CC) -c misc.c -o misc.o $(CFLAGS)
+
+print_structures.o: print_structures.c
+	$(CC) -c print_structures.c -o print_structures.o $(CFLAGS)
+
+random.o: random.c
+	$(CC) -c random.c -o random.o $(CFLAGS)
+
+routing.o: routing.c
+	$(CC) -c routing.c -o routing.o $(CFLAGS)
+
+main.o: main.c
+	$(CC) -c main.c -o main.o $(CFLAGS)
+
+rwa.o: rwa.c
+	$(CC) -c rwa.c -o rwa.o $(CFLAGS)

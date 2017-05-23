@@ -1,0 +1,161 @@
+model "Lab1 - LTD Splitted"
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+setparam("XPRS_MAXTIME",-600)
+
+!sample declarations section
+declarations
+	NODES = 1..16		!Number of nodes
+	NODES1 = 1..8
+	NODES2 = 8..16
+	
+	fsd: array(NODES,NODES,NODES,NODES) of mpvar	!Flow Matrix from s to d over lightpath ij
+  	f: array(NODES, NODES) of mpvar		!Total amount of traffic over lightpath ij
+  	fmax: mpvar
+  	
+  	TRAFFIC: array(NODES,NODES) of real
+	
+	b: array(NODES,NODES) of integer		!Presence of lightpath ij
+	DELTA: integer
+	
+end-declarations
+
+
+DELTA := 3	!Number of tx (laser) and rx (photodiode) per node
+
+forall(i,j in NODES) do
+	b(i,j):=0
+end-do
+b(1,2):=1
+b(2,1):=1
+b(1,4):=1
+b(4,1):=1
+b(1,5):=1
+b(5,1):=1
+b(1,13):=1
+b(13,1):=1
+
+b(2,3):=1
+b(3,2):=1
+b(2,6):=1
+b(6,2):=1
+b(2,14):=1
+b(14,2):=1
+
+b(3,4):=1
+b(4,3):=1
+b(3,7):=1
+b(7,3):=1
+b(3,15):=1
+b(15,3):=1
+
+b(8,4):=1
+b(4,8):=1
+b(16,4):=1
+b(4,16):=1
+
+b(6,5):=1
+b(5,6):=1
+b(8,5):=1
+b(5,8):=1
+b(9,5):=1
+b(5,9):=1
+
+b(6,7):=1
+b(7,6):=1
+b(6,10):=1
+b(10,6):=1
+
+b(7,8):=1
+b(8,7):=1
+b(7,11):=1
+b(11,7):=1
+
+b(8,12):=1
+b(12,8):=1
+
+b(9,10):=1
+b(10,9):=1
+b(9,12):=1
+b(12,9):=1
+b(9,13):=1
+b(13,9):=1
+
+b(10,11):=1
+b(11,10):=1
+b(10,14):=1
+b(14,10):=1
+
+b(11,12):=1
+b(12,11):=1
+b(11,15):=1
+b(15,11):=1
+
+b(12,16):=1
+b(16,12):=1
+
+b(13,14):=1
+b(14,13):=1
+b(13,16):=1
+b(16,13):=1
+
+b(14,15):=1
+b(15,14):=1
+
+b(15,16):=1
+b(16,15):=1
+
+setrandseed(2) !set a different seed for each run
+
+! generate a unbalanced matrix (see point 6 lab1)
+forall(n in NODES1) do
+	forall(m in NODES1 | n <> m) do
+	TRAFFIC(n,m):= 10+(random*(20-10))
+	end-do
+	forall(m in NODES2 | n <> m) do
+	TRAFFIC(n,m):= 1+(random*(2-1))
+	end-do
+end-do
+forall(n in NODES2) do
+	forall(m in NODES1 | n <> m) do
+	TRAFFIC(n,m):= 1+(random*(2-1))
+	end-do
+	forall(m in NODES2 | n <> m) do
+	TRAFFIC(n,m):= 10+(random*(20-10))
+	end-do
+end-do
+
+! OBJECTIVE FUNCTION
+! fmax
+
+! CONSTRAINTS
+!Flow Relationships
+forall (i, j in NODES) do
+	f(i, j) <= fmax
+	sum(s,d in NODES) fsd(i, j, s, d) = f(i, j)
+end-do
+
+!Connectivity constraints	! REMOVED because here matrix b is an input/parameter given by us
+!forall (i, j in NODES) b(i, j) is_binary
+!forall(i in NODES) sum(j in NODES) b(i, j) <= DELTA
+!forall(j in NODES) sum(i in NODES) b(i, j) <= DELTA 
+
+!Flow conservation at each node
+forall(s, d in NODES) do
+	forall(i in NODES | i <> s and i <> d) sum(j in NODES) fsd(i, j, s, d) - sum(j in NODES) fsd(j, i, s, d) = 0
+	!what enters in a node must come out
+	sum(j in NODES) fsd(s, j, s, d) = TRAFFIC(s, d)	!total flow exiting s must be traffic
+	sum(j in NODES) fsd(j, d, s, d) = TRAFFIC(s, d)	!total flow entering d must be traffic
+	sum(j in NODES) fsd(j, s, s, d) = 0		!nothing can enter s
+	sum(j in NODES) fsd(d, j, s, d) = 0		!nothing can exit d
+end-do
+!Feasibility constraints
+forall(i, j, s, d in NODES) fsd(i, j, s, d) <= b(i, j)*TRAFFIC(s, d)
+
+! OPTIMIZATION STATEMENT
+minimize(fmax)
+
+! Display OUTPUT
+writeln("fmax = ", getobjval)
+
+end-model
