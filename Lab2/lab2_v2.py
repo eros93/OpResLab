@@ -19,7 +19,7 @@ def shift(vector,n):
 
 
 # ************ creation of the empty graph ************
-N = 30
+N = 15
 delta = 3
 np.random.seed(7)
 nodes = range(N)  # list of nodes
