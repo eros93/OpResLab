@@ -16,12 +16,10 @@ def shift(vector,n):
 # ************ creation of the Random graph ************
 #N = 20
 #delta = 1
+p = 0.1
 for delta in [2,3]:
 	for N in [20]:
-		if N == 20 and delta == 3:
-			break
-		if N == 20 and delta == 2:
-			break
+
 		np.random.seed(7)
 		nodes = range(N)  # list of nodes
 		degree = [delta for i in xrange(N)]
@@ -33,7 +31,11 @@ for delta in [2,3]:
 		for i in range(N):
 			for j in range(N):
 				if i != j:
-					tsd[i, j] = 0.5 + np.random.random()
+					coin = np.random.random()
+					if coin < p:
+						tsd[i, j] = 5 + np.random.random() * 10
+					else:
+						tsd[i, j] = 0.5 + np.random.random()
 
 		#print tsd
 		# ************ remove symmetric edges************
@@ -114,6 +116,6 @@ for delta in [2,3]:
 		#string = "the fmax of the Random Graph is: ", np.round(maxFlowSecondGraph,2)
 		#plt.xlabel(string)
 		#plt.colorbar(edges)
-		fname = "N%d_delta%d_fmax%d_rand" %(N,delta,maxFlowSecondGraph)
+		fname = "HIghLowTraffic_N%d_delta%d_fmax%d_rand" %(N,delta,maxFlowSecondGraph)
 		plt.plot()
 		plt.savefig(fname)

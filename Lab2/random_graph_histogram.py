@@ -1,6 +1,9 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+
+inputfile = open("lab2_v2_random.json","w+")
 
 def add_costEdge(costEdges, path, traffic):
 	length_path = len(path)
@@ -16,12 +19,10 @@ def shift(vector,n):
 # ************ creation of the Random graph ************
 #N = 20
 #delta = 1
-for delta in [2,3]:
-	for N in [20]:
-		if N == 20 and delta == 3:
-			break
-		if N == 20 and delta == 2:
-			break
+output = {}
+for delta in [2,3,4]:
+	vector_fmax = []
+	for N in range(5,15):
 		np.random.seed(7)
 		nodes = range(N)  # list of nodes
 		degree = [delta for i in xrange(N)]
@@ -97,23 +98,13 @@ for delta in [2,3]:
 
 		del labels[tuple(zip(*ii))[0]]
 
-		plt.figure(num=None, figsize=(10, 10))
 
-		pos=nx.random_layout(G) # positions for all nodes
-
-		nx.draw_networkx_nodes(G, pos, node_size=700, node_color='lightBlue', node_shape='o', alpha=1.0, cmap=None, vmin=None, vmax=None, ax=None, linewidths=None, label=None)
-		nx.draw_networkx_edges(G,pos, edgelist=weigther_edge, edge_color='r', width=3)
-		nx.draw_networkx_edge_labels(G,pos,edge_labels=label_weightest, label_pos=0.6, font_size=15, font_color='r', )
-		nx.draw_networkx_edges(G,pos)
-		nx.draw_networkx_labels(G,pos,font_size=10,font_family='sans-serif')
-		nx.draw_networkx_edge_labels(G,pos,edge_labels=labels)
 
 		string = "Random Graph with Nnodes = %d, Delta = %d" %(N,delta)
-		plt.title(string)
-
-		#string = "the fmax of the Random Graph is: ", np.round(maxFlowSecondGraph,2)
-		#plt.xlabel(string)
-		#plt.colorbar(edges)
 		fname = "N%d_delta%d_fmax%d_rand" %(N,delta,maxFlowSecondGraph)
-		plt.plot()
-		plt.savefig(fname)
+		vector_fmax.append(maxFlowSecondGraph)
+
+	output[str(delta)] = vector_fmax
+
+inputfile.write(json.dumps(output))
+inputfile.close()

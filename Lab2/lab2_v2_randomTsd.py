@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import sys
 
 PRINT_RING = False
-
+p = 0.1
 def printGraph(G):
 	nx.draw_networkx(G,arrows=True,with_labels=True)
 	plt.show()
@@ -24,8 +24,8 @@ def shift(vector,n):
 # ************ creation of the empty graph ************
 #N = 20
 #delta = 2
-for delta in [4]:
-	for N in [10]:
+for delta in [2,3]:
+	for N in [20]:
 		np.random.seed(7)
 		nodes = range(N)  # list of nodes
 		flagNodes = []  # create an array that give the information of the taken nodes (0 if not take, 1 if already take)
@@ -42,7 +42,11 @@ for delta in [4]:
 		for i in range(N):
 			for j in range(N):
 				if i != j:
-					tsd[i, j] = 0.5 + np.random.random()
+					coin = np.random.random()
+					if coin < p:
+						tsd[i, j] = 5 + np.random.random() * 10
+					else :
+						tsd[i, j] = 0.5 + np.random.random()
 
 		#print tsd
 
@@ -230,7 +234,7 @@ for delta in [4]:
 		nx.draw_networkx_edge_labels(G,pos,edge_labels=labels)
 
 		string = "Greedy Heuristic Graph with Nnodes = %d, delta = %d" %(N,delta)
-		fname = "N%d_delta%d_fmax%d" %(N,delta,maxFlowSecondGraph)
+		fname = "HIghLowTraffic_N%d_delta%d_fmax%d" %(N,delta,maxFlowSecondGraph)
 		plt.title(string)
 		#plt.colorbar(edges)
 		plt.plot()

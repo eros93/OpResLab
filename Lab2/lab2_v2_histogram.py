@@ -2,7 +2,10 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import json
 
+
+inputfile = open("lab2_v2.json","w+")
 PRINT_RING = False
 
 def printGraph(G):
@@ -24,8 +27,10 @@ def shift(vector,n):
 # ************ creation of the empty graph ************
 #N = 20
 #delta = 2
-for delta in [4]:
-	for N in [10]:
+output = {}
+for delta in [2,3,4]:
+	vector_fmax = []
+	for N in range(5,15):
 		np.random.seed(7)
 		nodes = range(N)  # list of nodes
 		flagNodes = []  # create an array that give the information of the taken nodes (0 if not take, 1 if already take)
@@ -218,20 +223,19 @@ for delta in [4]:
 
 		#print labels
 
-		plt.figure(num=None, figsize=(10, 10))
 
-		pos = nx.shell_layout(G) # positions for all nodes
+		vector_fmax.append(maxFlowSecondGraph)
 
-		nx.draw_networkx_nodes(G, pos, node_size=700, node_color='lightBlue', node_shape='o', alpha=1.0, cmap=None, vmin=None, vmax=None, ax=None, linewidths=None, label=None)
-		nx.draw_networkx_edges(G,pos, edgelist=weigther_edge, edge_color='r', width=3)
-		nx.draw_networkx_edge_labels(G,pos,edge_labels=label_weightest, label_pos=0.6, font_size=15, font_color='r', )
-		nx.draw_networkx_edges(G,pos)
-		nx.draw_networkx_labels(G,pos,font_size=10,font_family='sans-serif')
-		nx.draw_networkx_edge_labels(G,pos,edge_labels=labels)
+	fname= "graph_lab2_v2_delta%d" %delta
+	fig1, fmax_plot = plt.subplots(1, 1)
+	fmax_plot.plot(np.linspace(5,15,10), vector_fmax)
+	fmax_plot.set_xlabel("Number of nodes")
+	fmax_plot.set_ylabel("fmax")
+	fmax_plot.grid()
+	plt.plot()
+	plt.savefig("graph_lab2_v2")
 
-		string = "Greedy Heuristic Graph with Nnodes = %d, delta = %d" %(N,delta)
-		fname = "N%d_delta%d_fmax%d" %(N,delta,maxFlowSecondGraph)
-		plt.title(string)
-		#plt.colorbar(edges)
-		plt.plot()
-		plt.savefig(fname)
+	output[str(delta)] = vector_fmax
+
+inputfile.write(json.dumps(output))
+inputfile.close()
