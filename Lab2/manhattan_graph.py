@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 np.random.seed(3)
 #print i
 
-N=2
+N=4
 N_node = N*N
 traffic_sort = []
 
